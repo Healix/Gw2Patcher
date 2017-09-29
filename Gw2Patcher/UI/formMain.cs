@@ -33,7 +33,7 @@ namespace Gw2Patcher.UI
         private Net.AssetServer.Server server;
         private Net.AssetDownloader downloader;
         private long totalBytesDownloaded;
-        private HashSet<string> missingFiles;
+        private HashSet<string> missingFiles, erroredFiles;
         private formWarnings requestsWindow;
         private HashSet<string> failedFiles;
         private IPAddress[] assetIPs;
@@ -122,6 +122,7 @@ namespace Gw2Patcher.UI
             checkUpdatesManualNoHeaders.Checked = Settings.UpdatesExportSubstituteHeaders;
             checkUpdatesManualIncludeExisting.Checked = Settings.UpdatesExportIncludeExisting;
             checkPatchEnableDownloadUncompressed.Checked = Settings.ServerAllowUncompressedDownloads;
+            numericTimeout.Value = Settings.ConnectionTimeout / 1000;
         }
 
         void sidebarButton_SelectedChanged(object sender, EventArgs e)
@@ -449,7 +450,10 @@ namespace Gw2Patcher.UI
                 WebClient[] clients = new WebClient[10];
 
                 for (var i = 0; i < 10; i++)
-                    clients[i] = new WebClient();
+                {
+                    var c = clients[i] = new WebClient();
+                    c.Headers.Add(HttpRequestHeader.Cookie, "authCookie=access=/latest/*!/manifest/program/*!/program/*~md5=4e51ad868f87201ad93e428ff30c6691");
+                }
 
                 int[] exeIds = new int[3];
                 int buildId = 0;
@@ -1162,8 +1166,13 @@ namespace Gw2Patcher.UI
                         };
 
                     downloader.RequestComplete +=
-                        delegate(object o, int index, string location, long contentLength)
+                        delegate(object o, Net.AssetDownloader.RequestCompleteEventArgs re)
                         {
+                            int index = re.Index;
+                            string location = re.Location;
+                            long contentLength = re.ContentBytes;
+                            HttpStatusCode code = re.StatusCode;
+
                             lock (assets)
                             {
                                 downloaded++;
@@ -1308,7 +1317,7 @@ namespace Gw2Patcher.UI
                     }
                     catch
                     {
-                        MessageBox.Show(this, "Unable to create session folder:\n\n" + root.FullName, "Faile to create folder", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(this, "Unable to create session folder:\n\n" + root.FullName, "Failed to create folder", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
@@ -1486,30 +1495,54 @@ namespace Gw2Patcher.UI
                     };
 
                 downloader.RequestComplete +=
-                    delegate(object o, int index, string location, long contentLength)
+                    delegate(object o, Net.AssetDownloader.RequestCompleteEventArgs re)
                     {
-                        lock (assets)
-                        {
-                            filesDownloaded++;
-                            estimatedTotal += (contentLength - sizes[index]);
-                            contentBytesDownloaded += contentLength;
-                        }
+                        int index = re.Index;
+                        string location = re.Location;
+                        long contentLength = re.ContentBytes;
+                        HttpStatusCode code = re.StatusCode;
 
-                        try
+                        if (re.StatusCode == HttpStatusCode.NotFound)
                         {
-                            lock (session)
+                            int baseId, fileId;
+                            bool isCompressed;
+
+                            if (ParseRequest(re.Location, out baseId, out fileId, out isCompressed) && baseId != 0)
                             {
-                                var entry = entries[index];
-                                session.Write(entry.baseId);
-                                session.Write(entry.fileId);
-                                session.Write((uint)contentLength);
+                                re.Location = GetAssetRequest(0, fileId);
+                                re.Retry = true;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Unable to retry for " + re.Location);
                             }
                         }
-                        catch (Exception ex)
+
+                        if (!re.Retry)
                         {
-                            if (clientException == null)
-                                clientException = ex;
-                            downloader.Abort(false);
+                            lock (assets)
+                            {
+                                filesDownloaded++;
+                                estimatedTotal += (contentLength - sizes[index]);
+                                contentBytesDownloaded += contentLength;
+                            }
+
+                            try
+                            {
+                                lock (session)
+                                {
+                                    var entry = entries[index];
+                                    session.Write(entry.baseId);
+                                    session.Write(entry.fileId);
+                                    session.Write((uint)contentLength);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                if (clientException == null)
+                                    clientException = ex;
+                                downloader.Abort(false);
+                            }
                         }
                     };
 
@@ -1724,6 +1757,7 @@ namespace Gw2Patcher.UI
 
             var downloader = new Net.AssetDownloader(2, new Net.IPPool(ips), new Uri(ASSET_URL).DnsSafeHost, PATH_CACHE);
             missingFiles = new HashSet<string>();
+            erroredFiles = new HashSet<string>();
 
             int downloadedFiles = 0;
             int lastFiles = 0;
@@ -1763,7 +1797,7 @@ namespace Gw2Patcher.UI
                 };
 
             Net.AssetDownloader.RequestCompleteEventHandler downloaderRequestComplete =
-                delegate(object o, int index, string location, long contentBytes)
+                delegate(object o, Net.AssetDownloader.RequestCompleteEventArgs re)
                 {
                     lock (downloader)
                     {
@@ -1786,6 +1820,8 @@ namespace Gw2Patcher.UI
                         if (failed != null)
                             return;
                         failed = error;
+
+                        erroredFiles.Add(location);
                     }
 
                     ShowRequestWarning(location, formWarnings.Warnings.DownloadError, error);
@@ -1805,6 +1841,7 @@ namespace Gw2Patcher.UI
             bool allowDownloads = checkPatchEnableDownload.Checked;
             bool isCompressed;
             int baseId, fileId;
+            
             if (ParseRequest(e.Location, out baseId, out fileId, out isCompressed))
             {
                 if (!isCompressed)
@@ -1832,84 +1869,105 @@ namespace Gw2Patcher.UI
                 {
                     var client = (Net.AssetServer.Client)sender;
 
-                    ManualResetEvent waiter = new ManualResetEvent(false);
-                    EventHandler closed = null;
-                    Net.AssetDownloader.RequestCompleteEventHandler requestComplete = null;
-                    
-                    Action remove =
-                        delegate
-                        {
-                            lock (e)
+                    using (ManualResetEvent waiter = new ManualResetEvent(false))
+                    {
+                        EventHandler closed = null;
+                        Net.AssetDownloader.RequestCompleteEventHandler requestComplete = null;
+                        Net.AssetDownloader.ErrorEventHandler requestError = null;
+                        bool failed = false;
+
+                        Action remove =
+                            delegate
                             {
-                                downloader.Complete -= closed;
-                                downloader.RequestComplete -= requestComplete;
-                                client.Closed -= closed;
+                                lock (e)
+                                {
+                                    downloader.Complete -= closed;
+                                    downloader.RequestComplete -= requestComplete;
+                                    client.Closed -= closed;
+                                }
+
+                                waiter.Set();
+                            };
+
+                        closed =
+                            delegate
+                            {
+                                remove();
+                            };
+
+                        requestComplete =
+                            delegate(object o, Net.AssetDownloader.RequestCompleteEventArgs re)
+                            {
+                                if (re.Location == e.Location)
+                                {
+                                    remove();
+                                }
+                            };
+
+                        requestError =
+                            delegate(object o, int index, string location, Exception exception)
+                            {
+                                if (location == e.Location)
+                                {
+                                    failed = true;
+                                    remove();
+                                }
+                            };
+
+                        lock (e)
+                        {
+                            downloader.Complete += closed;
+                            downloader.RequestComplete += requestComplete;
+                            downloader.Error += requestError;
+                            client.Closed += closed;
+                        }
+
+                        bool added = true;
+                        lock (downloader)
+                        {
+                            if (missingFiles.Add(e.Location))
+                            {
+                                downloader.Add(e.Location);
                             }
+                            else
+                            {
+                                added = false;
+                                if (erroredFiles.Contains(e.Location))
+                                    failed = true;
+                            }
+                        }
 
-                            waiter.Set();
-                        };
-
-                    closed =
-                        delegate
+                        if (added)
                         {
-                            remove();
-                        };
-
-                    requestComplete =
-                        delegate(object o, int index, string location, long contentLength)
+                            if (!downloader.IsActive)
+                            {
+                                try
+                                {
+                                    this.Invoke(new MethodInvoker(
+                                        delegate
+                                        {
+                                            if (!downloader.IsActive)
+                                                downloader.Start();
+                                        }));
+                                }
+                                catch { }
+                            }
+                        }
+                        else
                         {
-                            if (location == e.Location)
+                            if (failed || File.Exists(Path.Combine(PATH_CACHE, Util.FileName.FromAssetRequest(e.Location))))
                             {
                                 remove();
                             }
-                        };
-
-                    lock (e)
-                    {
-                        downloader.Complete += closed;
-                        downloader.RequestComplete += requestComplete;
-                        client.Closed += closed;
-                    }
-
-                    bool added = true;
-                    lock (downloader)
-                    {
-                        if (missingFiles.Add(e.Location))
-                            downloader.Add(e.Location);
-                        else
-                            added = false;
-                    }
-
-                    if (added)
-                    {
-                        if (!downloader.IsActive)
-                        {
-                            try
-                            {
-                                this.Invoke(new MethodInvoker(
-                                    delegate
-                                    {
-                                        if (!downloader.IsActive)
-                                            downloader.Start();
-                                    }));
-                            }
-                            catch { }
                         }
-                    }
-                    else
-                    {
-                        if (File.Exists(Path.Combine(PATH_CACHE, Util.FileName.FromAssetRequest(e.Location))))
+
+                        while (!waiter.WaitOne())
                         {
-                            remove();
+                            Thread.Sleep(1000);
                         }
-                    }
 
-                    while (!waiter.WaitOne())
-                    {
-                        Thread.Sleep(1000);
+                        e.Retry = !failed;
                     }
-
-                    e.Retry = true;
                 }
             }
             else
@@ -2269,6 +2327,11 @@ namespace Gw2Patcher.UI
         private void labelUpdatesManualReady_Click(object sender, EventArgs e)
         {
             buttonPatch.Selected = true;
+        }
+
+        private void numericTimeout_ValueChanged(object sender, EventArgs e)
+        {
+            Settings.ConnectionTimeout = (int)numericTimeout.Value * 1000;
         }
     }
 }

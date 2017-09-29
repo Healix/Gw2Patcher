@@ -58,6 +58,19 @@
             this.panelUpdates = new System.Windows.Forms.Panel();
             this.radioUpdatesManual = new System.Windows.Forms.RadioButton();
             this.radioUpdatesAuto = new System.Windows.Forms.RadioButton();
+            this.panelUpdatesAuto = new System.Windows.Forms.Panel();
+            this.labelUpdatesAutoReady = new System.Windows.Forms.Label();
+            this.labelUpdatesDownloadSpeed = new System.Windows.Forms.Label();
+            this.labelUpdatesDownloadSize = new System.Windows.Forms.Label();
+            this.labelUpdatesDownloadFiles = new System.Windows.Forms.Label();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
+            this.label26 = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
+            this.progressUpdatesDownload = new System.Windows.Forms.ProgressBar();
+            this.buttonUpdatesDownload = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
             this.panelUpdatesManual = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
             this.labelUpdatesImportDownload = new System.Windows.Forms.Label();
@@ -73,19 +86,6 @@
             this.label24 = new System.Windows.Forms.Label();
             this.checkUpdatesManualIncludeExisting = new System.Windows.Forms.CheckBox();
             this.buttonGenerateUpdateOutput = new System.Windows.Forms.Button();
-            this.panelUpdatesAuto = new System.Windows.Forms.Panel();
-            this.labelUpdatesAutoReady = new System.Windows.Forms.Label();
-            this.labelUpdatesDownloadSpeed = new System.Windows.Forms.Label();
-            this.labelUpdatesDownloadSize = new System.Windows.Forms.Label();
-            this.labelUpdatesDownloadFiles = new System.Windows.Forms.Label();
-            this.label28 = new System.Windows.Forms.Label();
-            this.label27 = new System.Windows.Forms.Label();
-            this.label26 = new System.Windows.Forms.Label();
-            this.label25 = new System.Windows.Forms.Label();
-            this.progressUpdatesDownload = new System.Windows.Forms.ProgressBar();
-            this.buttonUpdatesDownload = new System.Windows.Forms.Button();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
             this.panelManifests = new System.Windows.Forms.Panel();
             this.labelManifestsReadyNoUpdates = new System.Windows.Forms.Label();
             this.labelManifestsReady = new System.Windows.Forms.Label();
@@ -122,14 +122,18 @@
             this.buttonUpdates = new Gw2Launcher.UI.Controls.SidebarButton();
             this.buttonManifests = new Gw2Launcher.UI.Controls.SidebarButton();
             this.buttonProcess = new Gw2Launcher.UI.Controls.SidebarButton();
+            this.label18 = new System.Windows.Forms.Label();
+            this.numericTimeout = new System.Windows.Forms.NumericUpDown();
+            this.label19 = new System.Windows.Forms.Label();
             this.panelDat.SuspendLayout();
             this.panelPatch.SuspendLayout();
             this.panelUpdates.SuspendLayout();
-            this.panelUpdatesManual.SuspendLayout();
             this.panelUpdatesAuto.SuspendLayout();
+            this.panelUpdatesManual.SuspendLayout();
             this.panelManifests.SuspendLayout();
             this.panelCleanup.SuspendLayout();
             this.sidebarPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericTimeout)).BeginInit();
             this.SuspendLayout();
             // 
             // panelDat
@@ -455,8 +459,8 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelUpdates.Controls.Add(this.radioUpdatesManual);
             this.panelUpdates.Controls.Add(this.radioUpdatesAuto);
-            this.panelUpdates.Controls.Add(this.panelUpdatesManual);
             this.panelUpdates.Controls.Add(this.panelUpdatesAuto);
+            this.panelUpdates.Controls.Add(this.panelUpdatesManual);
             this.panelUpdates.Location = new System.Drawing.Point(183, 12);
             this.panelUpdates.Name = "panelUpdates";
             this.panelUpdates.Size = new System.Drawing.Size(373, 302);
@@ -484,6 +488,153 @@
             this.radioUpdatesAuto.Text = "Automatic";
             this.radioUpdatesAuto.UseVisualStyleBackColor = true;
             this.radioUpdatesAuto.CheckedChanged += new System.EventHandler(this.radioUpdatesAuto_CheckedChanged);
+            // 
+            // panelUpdatesAuto
+            // 
+            this.panelUpdatesAuto.Controls.Add(this.label19);
+            this.panelUpdatesAuto.Controls.Add(this.numericTimeout);
+            this.panelUpdatesAuto.Controls.Add(this.label18);
+            this.panelUpdatesAuto.Controls.Add(this.labelUpdatesAutoReady);
+            this.panelUpdatesAuto.Controls.Add(this.labelUpdatesDownloadSpeed);
+            this.panelUpdatesAuto.Controls.Add(this.labelUpdatesDownloadSize);
+            this.panelUpdatesAuto.Controls.Add(this.labelUpdatesDownloadFiles);
+            this.panelUpdatesAuto.Controls.Add(this.label28);
+            this.panelUpdatesAuto.Controls.Add(this.label27);
+            this.panelUpdatesAuto.Controls.Add(this.label26);
+            this.panelUpdatesAuto.Controls.Add(this.label25);
+            this.panelUpdatesAuto.Controls.Add(this.progressUpdatesDownload);
+            this.panelUpdatesAuto.Controls.Add(this.buttonUpdatesDownload);
+            this.panelUpdatesAuto.Controls.Add(this.label7);
+            this.panelUpdatesAuto.Controls.Add(this.label8);
+            this.panelUpdatesAuto.Location = new System.Drawing.Point(13, 36);
+            this.panelUpdatesAuto.Name = "panelUpdatesAuto";
+            this.panelUpdatesAuto.Size = new System.Drawing.Size(349, 239);
+            this.panelUpdatesAuto.TabIndex = 59;
+            this.panelUpdatesAuto.Visible = false;
+            // 
+            // labelUpdatesAutoReady
+            // 
+            this.labelUpdatesAutoReady.AutoSize = true;
+            this.labelUpdatesAutoReady.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.labelUpdatesAutoReady.Font = new System.Drawing.Font("Segoe UI Semibold", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelUpdatesAutoReady.Location = new System.Drawing.Point(41, 214);
+            this.labelUpdatesAutoReady.Name = "labelUpdatesAutoReady";
+            this.labelUpdatesAutoReady.Size = new System.Drawing.Size(84, 13);
+            this.labelUpdatesAutoReady.TabIndex = 64;
+            this.labelUpdatesAutoReady.Text = "Ready to patch";
+            this.labelUpdatesAutoReady.Visible = false;
+            this.labelUpdatesAutoReady.Click += new System.EventHandler(this.labelUpdatesAutoReady_Click);
+            // 
+            // labelUpdatesDownloadSpeed
+            // 
+            this.labelUpdatesDownloadSpeed.AutoSize = true;
+            this.labelUpdatesDownloadSpeed.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelUpdatesDownloadSpeed.Location = new System.Drawing.Point(41, 196);
+            this.labelUpdatesDownloadSpeed.Name = "labelUpdatesDownloadSpeed";
+            this.labelUpdatesDownloadSpeed.Size = new System.Drawing.Size(19, 13);
+            this.labelUpdatesDownloadSpeed.TabIndex = 39;
+            this.labelUpdatesDownloadSpeed.Text = "---";
+            // 
+            // labelUpdatesDownloadSize
+            // 
+            this.labelUpdatesDownloadSize.AutoSize = true;
+            this.labelUpdatesDownloadSize.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelUpdatesDownloadSize.Location = new System.Drawing.Point(41, 178);
+            this.labelUpdatesDownloadSize.Name = "labelUpdatesDownloadSize";
+            this.labelUpdatesDownloadSize.Size = new System.Drawing.Size(19, 13);
+            this.labelUpdatesDownloadSize.TabIndex = 38;
+            this.labelUpdatesDownloadSize.Text = "---";
+            // 
+            // labelUpdatesDownloadFiles
+            // 
+            this.labelUpdatesDownloadFiles.AutoSize = true;
+            this.labelUpdatesDownloadFiles.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelUpdatesDownloadFiles.Location = new System.Drawing.Point(41, 160);
+            this.labelUpdatesDownloadFiles.Name = "labelUpdatesDownloadFiles";
+            this.labelUpdatesDownloadFiles.Size = new System.Drawing.Size(19, 13);
+            this.labelUpdatesDownloadFiles.TabIndex = 37;
+            this.labelUpdatesDownloadFiles.Text = "---";
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label28.Location = new System.Drawing.Point(1, 196);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(28, 13);
+            this.label28.TabIndex = 36;
+            this.label28.Text = "Rate";
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label27.Location = new System.Drawing.Point(1, 178);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(26, 13);
+            this.label27.TabIndex = 35;
+            this.label27.Text = "Size";
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label26.Location = new System.Drawing.Point(1, 160);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(26, 13);
+            this.label26.TabIndex = 34;
+            this.label26.Text = "Files";
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label25.Location = new System.Drawing.Point(1, 140);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(128, 15);
+            this.label25.TabIndex = 33;
+            this.label25.Text = "Download information";
+            // 
+            // progressUpdatesDownload
+            // 
+            this.progressUpdatesDownload.Location = new System.Drawing.Point(108, 49);
+            this.progressUpdatesDownload.Name = "progressUpdatesDownload";
+            this.progressUpdatesDownload.Size = new System.Drawing.Size(225, 23);
+            this.progressUpdatesDownload.TabIndex = 32;
+            this.progressUpdatesDownload.Visible = false;
+            // 
+            // buttonUpdatesDownload
+            // 
+            this.buttonUpdatesDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonUpdatesDownload.Font = new System.Drawing.Font("Segoe UI", 8.25F);
+            this.buttonUpdatesDownload.Location = new System.Drawing.Point(8, 48);
+            this.buttonUpdatesDownload.Name = "buttonUpdatesDownload";
+            this.buttonUpdatesDownload.Size = new System.Drawing.Size(89, 25);
+            this.buttonUpdatesDownload.TabIndex = 31;
+            this.buttonUpdatesDownload.Text = "Download";
+            this.buttonUpdatesDownload.UseVisualStyleBackColor = true;
+            this.buttonUpdatesDownload.Click += new System.EventHandler(this.buttonUpdatesDownload_Click);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(0, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(107, 15);
+            this.label7.TabIndex = 20;
+            this.label7.Text = "Download updates";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(1, 16);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(338, 26);
+            this.label8.TabIndex = 21;
+            this.label8.Text = "Downloads the difference between Gw2.dat and the update manifests. \r\nExisting cac" +
+    "he files will be skipped.";
             // 
             // panelUpdatesManual
             // 
@@ -658,149 +809,6 @@
             this.buttonGenerateUpdateOutput.Text = "Export";
             this.buttonGenerateUpdateOutput.UseVisualStyleBackColor = true;
             this.buttonGenerateUpdateOutput.Click += new System.EventHandler(this.buttonGenerateUpdateOutput_Click);
-            // 
-            // panelUpdatesAuto
-            // 
-            this.panelUpdatesAuto.Controls.Add(this.labelUpdatesAutoReady);
-            this.panelUpdatesAuto.Controls.Add(this.labelUpdatesDownloadSpeed);
-            this.panelUpdatesAuto.Controls.Add(this.labelUpdatesDownloadSize);
-            this.panelUpdatesAuto.Controls.Add(this.labelUpdatesDownloadFiles);
-            this.panelUpdatesAuto.Controls.Add(this.label28);
-            this.panelUpdatesAuto.Controls.Add(this.label27);
-            this.panelUpdatesAuto.Controls.Add(this.label26);
-            this.panelUpdatesAuto.Controls.Add(this.label25);
-            this.panelUpdatesAuto.Controls.Add(this.progressUpdatesDownload);
-            this.panelUpdatesAuto.Controls.Add(this.buttonUpdatesDownload);
-            this.panelUpdatesAuto.Controls.Add(this.label7);
-            this.panelUpdatesAuto.Controls.Add(this.label8);
-            this.panelUpdatesAuto.Location = new System.Drawing.Point(13, 36);
-            this.panelUpdatesAuto.Name = "panelUpdatesAuto";
-            this.panelUpdatesAuto.Size = new System.Drawing.Size(349, 239);
-            this.panelUpdatesAuto.TabIndex = 59;
-            this.panelUpdatesAuto.Visible = false;
-            // 
-            // labelUpdatesAutoReady
-            // 
-            this.labelUpdatesAutoReady.AutoSize = true;
-            this.labelUpdatesAutoReady.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.labelUpdatesAutoReady.Font = new System.Drawing.Font("Segoe UI Semibold", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUpdatesAutoReady.Location = new System.Drawing.Point(41, 160);
-            this.labelUpdatesAutoReady.Name = "labelUpdatesAutoReady";
-            this.labelUpdatesAutoReady.Size = new System.Drawing.Size(84, 13);
-            this.labelUpdatesAutoReady.TabIndex = 64;
-            this.labelUpdatesAutoReady.Text = "Ready to patch";
-            this.labelUpdatesAutoReady.Visible = false;
-            this.labelUpdatesAutoReady.Click += new System.EventHandler(this.labelUpdatesAutoReady_Click);
-            // 
-            // labelUpdatesDownloadSpeed
-            // 
-            this.labelUpdatesDownloadSpeed.AutoSize = true;
-            this.labelUpdatesDownloadSpeed.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUpdatesDownloadSpeed.Location = new System.Drawing.Point(41, 142);
-            this.labelUpdatesDownloadSpeed.Name = "labelUpdatesDownloadSpeed";
-            this.labelUpdatesDownloadSpeed.Size = new System.Drawing.Size(19, 13);
-            this.labelUpdatesDownloadSpeed.TabIndex = 39;
-            this.labelUpdatesDownloadSpeed.Text = "---";
-            // 
-            // labelUpdatesDownloadSize
-            // 
-            this.labelUpdatesDownloadSize.AutoSize = true;
-            this.labelUpdatesDownloadSize.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUpdatesDownloadSize.Location = new System.Drawing.Point(41, 124);
-            this.labelUpdatesDownloadSize.Name = "labelUpdatesDownloadSize";
-            this.labelUpdatesDownloadSize.Size = new System.Drawing.Size(19, 13);
-            this.labelUpdatesDownloadSize.TabIndex = 38;
-            this.labelUpdatesDownloadSize.Text = "---";
-            // 
-            // labelUpdatesDownloadFiles
-            // 
-            this.labelUpdatesDownloadFiles.AutoSize = true;
-            this.labelUpdatesDownloadFiles.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUpdatesDownloadFiles.Location = new System.Drawing.Point(41, 106);
-            this.labelUpdatesDownloadFiles.Name = "labelUpdatesDownloadFiles";
-            this.labelUpdatesDownloadFiles.Size = new System.Drawing.Size(19, 13);
-            this.labelUpdatesDownloadFiles.TabIndex = 37;
-            this.labelUpdatesDownloadFiles.Text = "---";
-            // 
-            // label28
-            // 
-            this.label28.AutoSize = true;
-            this.label28.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label28.Location = new System.Drawing.Point(1, 142);
-            this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(28, 13);
-            this.label28.TabIndex = 36;
-            this.label28.Text = "Rate";
-            // 
-            // label27
-            // 
-            this.label27.AutoSize = true;
-            this.label27.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label27.Location = new System.Drawing.Point(1, 124);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(26, 13);
-            this.label27.TabIndex = 35;
-            this.label27.Text = "Size";
-            // 
-            // label26
-            // 
-            this.label26.AutoSize = true;
-            this.label26.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label26.Location = new System.Drawing.Point(1, 106);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(26, 13);
-            this.label26.TabIndex = 34;
-            this.label26.Text = "Files";
-            // 
-            // label25
-            // 
-            this.label25.AutoSize = true;
-            this.label25.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label25.Location = new System.Drawing.Point(1, 86);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(128, 15);
-            this.label25.TabIndex = 33;
-            this.label25.Text = "Download information";
-            // 
-            // progressUpdatesDownload
-            // 
-            this.progressUpdatesDownload.Location = new System.Drawing.Point(108, 49);
-            this.progressUpdatesDownload.Name = "progressUpdatesDownload";
-            this.progressUpdatesDownload.Size = new System.Drawing.Size(225, 23);
-            this.progressUpdatesDownload.TabIndex = 32;
-            this.progressUpdatesDownload.Visible = false;
-            // 
-            // buttonUpdatesDownload
-            // 
-            this.buttonUpdatesDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonUpdatesDownload.Font = new System.Drawing.Font("Segoe UI", 8.25F);
-            this.buttonUpdatesDownload.Location = new System.Drawing.Point(8, 48);
-            this.buttonUpdatesDownload.Name = "buttonUpdatesDownload";
-            this.buttonUpdatesDownload.Size = new System.Drawing.Size(89, 25);
-            this.buttonUpdatesDownload.TabIndex = 31;
-            this.buttonUpdatesDownload.Text = "Download";
-            this.buttonUpdatesDownload.UseVisualStyleBackColor = true;
-            this.buttonUpdatesDownload.Click += new System.EventHandler(this.buttonUpdatesDownload_Click);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(0, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(107, 15);
-            this.label7.TabIndex = 20;
-            this.label7.Text = "Download updates";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(1, 16);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(338, 26);
-            this.label8.TabIndex = 21;
-            this.label8.Text = "Downloads the difference between Gw2.dat and the update manifests. \r\nExisting cache files will be skipped.";
             // 
             // panelManifests
             // 
@@ -1029,7 +1037,8 @@
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(348, 26);
             this.label12.TabIndex = 21;
-            this.label12.Text = "Manifests contain a list of all required files which will be compared against\r\nGw2.dat to determine which ones are needed";
+            this.label12.Text = "Manifests contain a list of all required files which will be compared against\r\nGw" +
+    "2.dat to determine which ones are needed";
             // 
             // checkManifests64
             // 
@@ -1250,6 +1259,49 @@
             this.buttonProcess.TabIndex = 3;
             this.buttonProcess.Text = "Process Gw2.dat";
             // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label18.Location = new System.Drawing.Point(1, 86);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(113, 15);
+            this.label18.TabIndex = 65;
+            this.label18.Text = "Connection timeout";
+            // 
+            // numericTimeout
+            // 
+            this.numericTimeout.Location = new System.Drawing.Point(4, 104);
+            this.numericTimeout.Maximum = new decimal(new int[] {
+            600,
+            0,
+            0,
+            0});
+            this.numericTimeout.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.numericTimeout.Name = "numericTimeout";
+            this.numericTimeout.Size = new System.Drawing.Size(51, 22);
+            this.numericTimeout.TabIndex = 66;
+            this.numericTimeout.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.numericTimeout.ValueChanged += new System.EventHandler(this.numericTimeout_ValueChanged);
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Font = new System.Drawing.Font("Segoe UI Semilight", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label19.Location = new System.Drawing.Point(61, 106);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(44, 13);
+            this.label19.TabIndex = 67;
+            this.label19.Text = "seconds";
+            // 
             // formMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1275,15 +1327,16 @@
             this.panelPatch.PerformLayout();
             this.panelUpdates.ResumeLayout(false);
             this.panelUpdates.PerformLayout();
-            this.panelUpdatesManual.ResumeLayout(false);
-            this.panelUpdatesManual.PerformLayout();
             this.panelUpdatesAuto.ResumeLayout(false);
             this.panelUpdatesAuto.PerformLayout();
+            this.panelUpdatesManual.ResumeLayout(false);
+            this.panelUpdatesManual.PerformLayout();
             this.panelManifests.ResumeLayout(false);
             this.panelManifests.PerformLayout();
             this.panelCleanup.ResumeLayout(false);
             this.panelCleanup.PerformLayout();
             this.sidebarPanel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numericTimeout)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1384,6 +1437,9 @@
         private System.Windows.Forms.Label label41;
         private System.Windows.Forms.Button buttonCleanupDelete;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.NumericUpDown numericTimeout;
+        private System.Windows.Forms.Label label18;
     }
 }
 

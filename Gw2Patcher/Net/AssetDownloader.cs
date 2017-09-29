@@ -12,8 +12,41 @@ namespace Gw2Patcher.Net
 {
     class AssetDownloader : IDisposable
     {
-        public delegate void RequestCompleteEventHandler(object sender, int index, string location, long contentBytes);
+        public delegate void RequestCompleteEventHandler(object sender, RequestCompleteEventArgs e);
         public delegate void ErrorEventHandler(object sender, int index, string location, Exception exception);
+
+        public class RequestCompleteEventArgs : EventArgs
+        {
+            public string Location
+            {
+                get;
+                set;
+            }
+
+            public HttpStatusCode StatusCode
+            {
+                get;
+                set;
+            }
+
+            public bool Retry
+            {
+                get;
+                set;
+            }
+
+            public int Index
+            {
+                get;
+                set;
+            }
+
+            public long ContentBytes
+            {
+                get;
+                set;
+            }
+        }
 
         public event EventHandler Complete;
         public event ErrorEventHandler Error;
@@ -43,7 +76,7 @@ namespace Gw2Patcher.Net
             public event EventHandler RequestBegin;
 
             public const int BUFFER_LENGTH = 65536;
-            private const int TIMEOUT = 5000;
+            //private const int TIMEOUT = 5000;
 
             private TcpClient client, clientSwap;
             private IPPool ipPool;
@@ -60,7 +93,8 @@ namespace Gw2Patcher.Net
 
             private void WriteHeader(Stream stream, string host, string request)
             {
-                byte[] buffer = Encoding.ASCII.GetBytes((work.headersOnly ? "HEAD " : "GET ") + request + " HTTP/1.1\r\nCache-Control: no-cache\r\nPragma: no-cache\r\nHost: " + host + "\r\nConnection: keep-alive\r\n\r\n");
+                string header = (work.headersOnly ? "HEAD " : "GET ") + request + " HTTP/1.1\r\nCookie: authCookie=access=/latest/*!/manifest/program/*!/program/*~md5=4e51ad868f87201ad93e428ff30c6691\r\nHost: " + host + "\r\nConnection: keep-alive\r\nContent-Length: 0\r\n\r\n";
+                byte[] buffer = Encoding.ASCII.GetBytes(header);
                 stream.Write(buffer, 0, buffer.Length);
             }
 
@@ -107,7 +141,7 @@ namespace Gw2Patcher.Net
                 bool doSwap = false;
                 Task<IPAddress> taskSwap = null;
                 int counter = 0;
-                var timeout = DateTime.UtcNow.AddMilliseconds(TIMEOUT);
+                var timeout = DateTime.UtcNow.AddMilliseconds(Settings.ConnectionTimeout);
 
                 try
                 {
@@ -192,8 +226,8 @@ namespace Gw2Patcher.Net
                             {
                                 client = new TcpClient()
                                 {
-                                    ReceiveTimeout = TIMEOUT,
-                                    SendTimeout = TIMEOUT
+                                    ReceiveTimeout = Settings.ConnectionTimeout,
+                                    SendTimeout = Settings.ConnectionTimeout
                                 };
 
                                 try
@@ -201,7 +235,7 @@ namespace Gw2Patcher.Net
                                     remoteEP = new IPEndPoint(ipPool.GetIP(), 80);
                                     for (byte attempt = 10; attempt > 0; attempt--)
                                     {
-                                        if (!client.ConnectAsync(remoteEP.Address, remoteEP.Port).Wait(TIMEOUT))
+                                        if (!client.ConnectAsync(remoteEP.Address, remoteEP.Port).Wait(Settings.ConnectionTimeout))
                                         {
                                             client.Close();
 
@@ -258,10 +292,10 @@ namespace Gw2Patcher.Net
                                         delegate
                                         {
                                             var clientSwap = this.clientSwap = new TcpClient();
-                                            clientSwap.ReceiveTimeout = clientSwap.SendTimeout = TIMEOUT;
+                                            clientSwap.ReceiveTimeout = clientSwap.SendTimeout = Settings.ConnectionTimeout;
                                             try
                                             {
-                                                if (!clientSwap.ConnectAsync(ip, 80).Wait(TIMEOUT))
+                                                if (!clientSwap.ConnectAsync(ip, 80).Wait(Settings.ConnectionTimeout))
                                                 {
                                                     throw new TimeoutException();
                                                 }
@@ -291,6 +325,8 @@ namespace Gw2Patcher.Net
                                 string path = Path.Combine(work.path, Util.FileName.FromAssetRequest(request) + ".tmp");
                                 try
                                 {
+                                    HttpStatusCode code;
+
                                     using (var w = File.Create(path))
                                     {
                                         Net.HttpStream.HttpHeader header;
@@ -327,7 +363,9 @@ namespace Gw2Patcher.Net
 
                                         var elapsed = DateTime.UtcNow.Subtract(startTime).TotalMilliseconds;
 
-                                        if (response.StatusCode != HttpStatusCode.OK)
+                                        code = response.StatusCode;
+
+                                        if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.NotFound)
                                         {
                                             if (elapsed <= 0)
                                                 elapsed = 1;
@@ -346,7 +384,7 @@ namespace Gw2Patcher.Net
                                             throw new Exception("Content length doesn't match header");
                                         }
 
-                                        timeout = DateTime.UtcNow.AddMilliseconds(TIMEOUT);
+                                        timeout = DateTime.UtcNow.AddMilliseconds(Settings.ConnectionTimeout);
 
                                         if (!response.KeepAlive.keepAlive)
                                             client.Close();
@@ -360,7 +398,22 @@ namespace Gw2Patcher.Net
                                     delete = false;
 
                                     if (RequestComplete != null)
-                                        RequestComplete(this, index, request, stream.ContentLengthProcessed);
+                                    {
+                                        var e = new RequestCompleteEventArgs()
+                                        {
+                                            Index = index,
+                                            Location = request,
+                                            ContentBytes = stream.ContentLengthProcessed,
+                                            StatusCode = code,
+                                            Retry = false
+                                        };
+                                        RequestComplete(this, e);
+                                        if (e.Retry)
+                                        {
+                                            request = e.Location;
+                                            continue;
+                                        }
+                                    }
 
                                     break;
                                 }
@@ -378,6 +431,10 @@ namespace Gw2Patcher.Net
                             }
                             catch (Exception ex)
                             {
+                                if (!(ex is EndOfStreamException))
+                                {
+                                    Console.WriteLine("!EndOfStreamException");
+                                }
                                 client.Close();
 
                                 if (work.abort || --retry == 0)
@@ -386,8 +443,6 @@ namespace Gw2Patcher.Net
                                         Error(this, index, request, ex);
                                     return;
                                 }
-
-                                Thread.Sleep(1000);
                             }
                         }
                         while (true);
@@ -484,10 +539,10 @@ namespace Gw2Patcher.Net
         {
         }
 
-        void worker_RequestComplete(object sender, int index, string location, long contentBytes)
+        void worker_RequestComplete(object sender, Net.AssetDownloader.RequestCompleteEventArgs e)
         {
             if (RequestComplete != null)
-                RequestComplete(this, index, location, contentBytes);
+                RequestComplete(this, e);
         }
 
         void worker_Error(object sender, int index, string request, Exception e)

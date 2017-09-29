@@ -10,7 +10,7 @@ namespace Gw2Patcher
     static class Settings
     {
         private const uint HEADER = 1734755152; //PCfg
-        private const byte VERSION = 0;
+        private const byte VERSION = 1;
 
         public enum Panels : byte
         {
@@ -35,6 +35,7 @@ namespace Gw2Patcher
                 _Manifests64 = Environment.Is64BitOperatingSystem;
                 _Manifests32 = !_Manifests64;
                 _ManifestsEnglish = true;
+                _ConnectionTimeout = 5000;
             }
         }
 
@@ -50,11 +51,8 @@ namespace Gw2Patcher
 
             using (var r = new BinaryReader(File.Open("settings", FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
-                if (r.ReadUInt32() != HEADER)
-                    return;
-
-                if (r.ReadByte() != VERSION)
-                    return;
+                if (r.ReadUInt32() != HEADER || r.ReadByte() != VERSION)
+                    throw new FileNotFoundException();
 
                 _InitialPanel = (Panels)r.ReadByte();
                 _GW2Path = r.ReadString();
@@ -73,6 +71,7 @@ namespace Gw2Patcher
                 _ServerAllowRemoteConnections = r.ReadBoolean();
                 _ServerAllowDownloads = r.ReadBoolean();
                 _ServerAllowUncompressedDownloads = r.ReadBoolean();
+                _ConnectionTimeout = r.ReadInt32();
             }
         }
 
@@ -102,6 +101,7 @@ namespace Gw2Patcher
                     w.Write(_ServerAllowRemoteConnections);
                     w.Write(_ServerAllowDownloads);
                     w.Write(_ServerAllowUncompressedDownloads);
+                    w.Write(_ConnectionTimeout);
                 }
 
                 if (File.Exists("settings"))
@@ -135,6 +135,23 @@ namespace Gw2Patcher
                             }
                             while (startSave < lastChange);
                         });
+                }
+            }
+        }
+
+        private static int _ConnectionTimeout;
+        public static int ConnectionTimeout
+        {
+            get
+            {
+                return _ConnectionTimeout;
+            }
+            set
+            {
+                if (_ConnectionTimeout != value)
+                {
+                    _ConnectionTimeout = value;
+                    OnSettingsChanged();
                 }
             }
         }
